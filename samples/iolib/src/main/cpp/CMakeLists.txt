@@ -14,12 +14,14 @@ cmake_minimum_required(VERSION 3.4.1)
 #message("NDK is " ${NDK})
 
 # Set the path to the Oboe library directory
-set (OBOE_DIR ../../../../../)
+set (OBOE_DIR ../../../../../oboe)
 #message("OBOE_DIR = " + ${OBOE_DIR})
 
 # Pull in parselib
-set (PARSELIB_DIR ../../../../parselib)
+set (PARSELIB_DIR ${OBOE_DIR}/samples/parselib)
 #message("PARSELIB_DIR = " + ${PARSELIB_DIR})
+
+set (SHARED_DIR ${OBOE_DIR}/samples/shared)
 
 # compiler flags
 # -mhard-float -D_NDK_MATH_NO_SOFTFP=1
@@ -31,7 +33,7 @@ include_directories(
         ${OBOE_DIR}/include
         ${OBOE_DIR}/src/flowgraph
         ${CMAKE_CURRENT_LIST_DIR}
-        ../../../../shared)
+        ${SHARED_DIR})
 
 # Creates and names a library, sets it as either STATIC
 # or SHARED, and provides the relative paths to its source code.
