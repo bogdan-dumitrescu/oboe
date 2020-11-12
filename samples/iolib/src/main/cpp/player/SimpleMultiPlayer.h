@@ -77,19 +77,19 @@ public:
     float getGain(int index);
 
 private:
-    // Oboe Audio Stream
-    std::shared_ptr<oboe::AudioStream> mAudioStream;
+    std::vector<SampleBuffer*>  mSampleBuffers;
 
-    // Playback Audio attributes
+    bool    mOutputReset;
+protected:
     int32_t mChannelCount;
     int32_t mSampleRate;
 
     // Sample Data
     int32_t mNumSampleBuffers;
-    std::vector<SampleBuffer*>  mSampleBuffers;
     std::vector<SampleSource*>  mSampleSources;
 
-    bool    mOutputReset;
+    // Oboe Audio Stream
+    std::shared_ptr<oboe::AudioStream> mAudioStream;
 };
 
 }
