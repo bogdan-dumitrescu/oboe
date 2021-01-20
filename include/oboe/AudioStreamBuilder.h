@@ -75,6 +75,13 @@ public:
     }
 
     /**
+     * @deprecated use `setFramesPerDataCallback` instead.
+     */
+    AudioStreamBuilder *setFramesPerCallback(int framesPerCallback) {
+        return setFramesPerDataCallback(framesPerCallback);
+    }
+
+    /**
      * Request a specific number of frames for the data callback.
      *
      * Default is kUnspecified. If the value is unspecified then
@@ -88,7 +95,7 @@ public:
      * @param framesPerCallback
      * @return pointer to the builder so calls can be chained
      */
-    AudioStreamBuilder *setFramesPerCallback(int framesPerCallback) {
+    AudioStreamBuilder *setFramesPerDataCallback(int framesPerCallback) {
         mFramesPerCallback = framesPerCallback;
         return this;
     }
@@ -306,7 +313,43 @@ public:
     }
 
     /**
+     * Specifies an object to handle data related callbacks from the underlying API.
+     *
+     * <strong>Important: See AudioStreamCallback for restrictions on what may be called
+     * from the callback methods.</strong>
+     *
+     * @param dataCallback
+     * @return pointer to the builder so calls can be chained
+     */
+    AudioStreamBuilder *setDataCallback(oboe::AudioStreamDataCallback *dataCallback) {
+        mDataCallback = dataCallback;
+        return this;
+    }
+
+    /**
+     * Specifies an object to handle error related callbacks from the underlying API.
+     * This can occur when a stream is disconnected because a headset is plugged in or unplugged.
+     * It can also occur if the audio service fails or if an exclusive stream is stolen by
+     * another stream.
+     *
+     * <strong>Important: See AudioStreamCallback for restrictions on what may be called
+     * from the callback methods.</strong>
+     *
+     * <strong>When an error callback occurs, the associated stream must be stopped and closed
+     * in a separate thread.</strong>
+     *
+     * @param errorCallback
+     * @return pointer to the builder so calls can be chained
+     */
+    AudioStreamBuilder *setErrorCallback(oboe::AudioStreamErrorCallback *errorCallback) {
+        mErrorCallback = errorCallback;
+        return this;
+    }
+
+    /**
      * Specifies an object to handle data or error related callbacks from the underlying API.
+     *
+     * This is the equivalent of calling both setDataCallback() and setErrorCallback().
      *
      * <strong>Important: See AudioStreamCallback for restrictions on what may be called
      * from the callback methods.</strong>
@@ -327,7 +370,9 @@ public:
      * @return pointer to the builder so calls can be chained
      */
     AudioStreamBuilder *setCallback(AudioStreamCallback *streamCallback) {
-        mStreamCallback = streamCallback;
+        // Use the same callback object for both, dual inheritance.
+        mDataCallback = streamCallback;
+        mErrorCallback = streamCallback;
         return this;
     }
 
@@ -384,7 +429,8 @@ public:
     /**
      * Create and open a stream object based on the current settings.
      *
-     * The caller owns the pointer to the AudioStream object.
+     * The caller owns the pointer to the AudioStream object
+     * and must delete it when finished.
      *
      * @deprecated Use openStream(std::shared_ptr<oboe::AudioStream> &stream) instead.
      * @param stream pointer to a variable to receive the stream address
@@ -410,6 +456,8 @@ public:
      * The caller must create a unique ptr, and pass by reference so it can be
      * modified to point to an opened stream. The caller owns the unique ptr,
      * and it will be automatically closed and deleted when going out of scope.
+     *
+     * @deprecated Use openStream(std::shared_ptr<oboe::AudioStream> &stream) instead.
      * @param stream Reference to the ManagedStream (uniqueptr) used to keep track of stream
      * @return OBOE_OK if successful or a negative error code.
      */

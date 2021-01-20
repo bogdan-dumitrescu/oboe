@@ -15,12 +15,13 @@ Oboe is a C++ library which makes it easy to build high-performance audio apps o
 ## Requirements
 To build Oboe you'll need a compiler which supports C++14 and the Android header files. The easiest way to obtain these is by downloading the Android NDK r17 or above. It can be installed using Android Studio's SDK manager, or via [direct download](https://developer.android.com/ndk/downloads/).
 
-## API Documentation
+## Documentation
 - [Getting Started Guide](docs/GettingStarted.md)
 - [Full Guide to Oboe](docs/FullGuide.md)
 - [API reference](https://google.github.io/oboe/reference)
 - [Tech Notes](docs/notes/)
 - [History of Audio features/bugs by Android version](docs/AndroidAudioHistory.md)
+- [Migration guide for apps using OpenSL ES](docs/OpenSLESMigration.md)
 - [Frequently Asked Questions](docs/FAQ.md) (FAQ)
 - [Our roadmap](https://github.com/google/oboe/milestones) - Vote on a feature/issue by adding a thumbs up to the first comment.
 
@@ -31,9 +32,7 @@ To build Oboe you'll need a compiler which supports C++14 and the Android header
 ## Videos
 - [Getting started with Oboe](https://www.youtube.com/playlist?list=PLWz5rJ2EKKc_duWv9IPNvx9YBudNMmLSa)
 - [Low Latency Audio - Because Your Ears Are Worth It](https://www.youtube.com/watch?v=8vOf_fDtur4) (Android Dev Summit '18)
-- [Real-time audio with the 100 oscillator synthesizer](https://www.youtube.com/watch?v=J04iPJBkAKs) (DroidCon Berlin '18)
 - [Winning on Android](https://www.youtube.com/watch?v=tWBojmBpS74) - How to optimize an Android audio app. (ADC '18)
-- [Real-Time Processing on Android](https://youtu.be/hY9BrS2uX-c) (ADC '19)
 
 ## Sample code and apps
 - Sample apps can be found in the [samples directory](samples). 

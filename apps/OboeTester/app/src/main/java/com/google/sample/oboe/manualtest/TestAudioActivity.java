@@ -31,17 +31,13 @@ import android.widget.CheckBox;
 import android.widget.Toast;
 
 import java.io.IOException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 
 /**
  * Base class for other Activities.
  */
 abstract class TestAudioActivity extends Activity {
-    public static final String TAG = "TestOboe";
+    public static final String TAG = "OboeTester";
 
     protected static final int FADER_PROGRESS_MAX = 1000;
 
@@ -65,6 +61,7 @@ abstract class TestAudioActivity extends Activity {
     public static final int ACTIVITY_RT_LATENCY = 5;
     public static final int ACTIVITY_GLITCHES = 6;
     public static final int ACTIVITY_TEST_DISCONNECT = 7;
+    public static final int ACTIVITY_DATA_PATHS = 8;
 
     private int mAudioState = AUDIO_STATE_CLOSED;
     protected String audioManagerSampleRate;
@@ -79,6 +76,11 @@ abstract class TestAudioActivity extends Activity {
     private CheckBox mCallbackReturnStopBox;
     private int mSampleRate;
     private boolean mScoStarted;
+    private int mSingleTestIndex = -1;
+
+    public String getTestName() {
+        return "TestAudio";
+    }
 
     public static class StreamContext {
         StreamConfigurationView configurationView;
@@ -104,11 +106,15 @@ abstract class TestAudioActivity extends Activity {
                 boolean gotViews = false;
                 for (StreamContext streamContext : mStreamContexts) {
                     AudioStreamBase.StreamStatus status = streamContext.tester.getCurrentAudioStream().getStreamStatus();
+                    AudioStreamBase.DoubleStatistics latencyStatistics =
+                            streamContext.tester.getCurrentAudioStream().getLatencyStatistics();
                     if (streamContext.configurationView != null) {
                         // Handler runs this on the main UI thread.
                         int framesPerBurst = streamContext.tester.getCurrentAudioStream().getFramesPerBurst();
                         status.framesPerCallback = getFramesPerCallback();
-                        final String msg = status.dump(framesPerBurst);
+                        String msg = "";
+                        msg += "timestamp.latency = " + latencyStatistics.dump() + "\n";
+                        msg += status.dump(framesPerBurst);
                         streamContext.configurationView.setStatusText(msg);
                         updateStreamDisplay();
                         gotViews = true;
@@ -166,10 +172,20 @@ abstract class TestAudioActivity extends Activity {
         }
     }
 
+    abstract int getActivityType();
+
+    public void setSingleTestIndex(int testIndex) {
+        mSingleTestIndex = testIndex;
+    }
+    public int getSingleTestIndex() {
+        return mSingleTestIndex;
+    }
+
     @Override
     protected void onStart() {
         super.onStart();
         resetConfiguration();
+        setActivityType(getActivityType());
     }
 
     protected void resetConfiguration() {
@@ -177,9 +193,8 @@ abstract class TestAudioActivity extends Activity {
 
     @Override
     protected void onStop() {
-        Log.i(TAG, "onStop() called so stopping audio =========================");
-        stopAudio();
-        closeAudio();
+        Log.i(TAG, "onStop() called so stop the test =========================");
+        onStopTest();
         super.onStop();
     }
 
@@ -346,7 +361,11 @@ abstract class TestAudioActivity extends Activity {
 
     public void startAudio(View view) {
         Log.i(TAG, "startAudio() called =======================================");
-        startAudio();
+        try {
+            startAudio();
+        } catch (Exception e) {
+            showErrorToast(e.getMessage());
+        }
         keepScreenOn(true);
     }
 
@@ -452,10 +471,11 @@ abstract class TestAudioActivity extends Activity {
     protected native void setActivityType(int activityType);
     private native int getFramesPerCallback();
 
-    public void startAudio() {
+    public void startAudio() throws IOException {
         int result = startNative();
         if (result < 0) {
             showErrorToast("Start failed with " + result);
+            throw new IOException("startNative returned " + result);
         } else {
             for (StreamContext streamContext : mStreamContexts) {
                 StreamConfigurationView configView = streamContext.configurationView;
@@ -490,6 +510,18 @@ abstract class TestAudioActivity extends Activity {
             mAudioState = AUDIO_STATE_STOPPED;
             updateEnabledWidgets();
         }
+    }
+
+    public void runTest() {}
+
+    // This should only be called from UI events such as onStop or a button press.
+    public void onStopTest() {
+        stopTest();
+    }
+
+    public void stopTest() {
+        stopAudio();
+        closeAudio();
     }
 
     public void stopAudioQuiet() {
@@ -529,12 +561,6 @@ abstract class TestAudioActivity extends Activity {
         updateEnabledWidgets();
     }
 
-    String getTimestampString() {
-        DateFormat df = new SimpleDateFormat("yyyyMMdd-HHmmss");
-        Date now = Calendar.getInstance().getTime();
-        return df.format(now);
-    }
-
     void startBluetoothSco() {
         AudioManager myAudioMgr = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         myAudioMgr.startBluetoothSco();
@@ -544,4 +570,5 @@ abstract class TestAudioActivity extends Activity {
         AudioManager myAudioMgr = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         myAudioMgr.stopBluetoothSco();
     }
+
 }

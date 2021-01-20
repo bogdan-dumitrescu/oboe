@@ -42,6 +42,8 @@ public class GlitchActivity extends AnalyzerActivity {
     final static int STATE_LOCKED = 4;
     final static int STATE_GLITCHING = 5;
     String mLastGlitchReport;
+    private int mInputChannel;
+    private int mOutputChannel;
 
     native int getStateFrameCount(int state);
     native int getGlitchCount();
@@ -68,10 +70,54 @@ public class GlitchActivity extends AnalyzerActivity {
         }
     }
 
-    // Periodically query for glitches from the native detector.
-    protected class GlitchSniffer {
+    protected abstract class NativeSniffer implements Runnable {
         public static final int SNIFFER_UPDATE_PERIOD_MSEC = 100;
         public static final int SNIFFER_UPDATE_DELAY_MSEC = 200;
+        protected Handler mHandler = new Handler(Looper.getMainLooper()); // UI thread
+        protected volatile boolean mEnabled = true;
+
+        public void startSniffer() {
+            long now = System.currentTimeMillis();
+            // Start the initial runnable task by posting through the handler
+            mEnabled = true;
+            mHandler.postDelayed(this, SNIFFER_UPDATE_DELAY_MSEC);
+        }
+
+        public void stopSniffer() {
+            mEnabled = false;
+            if (mHandler != null) {
+                mHandler.removeCallbacks(this);
+            }
+
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    updateStatusText();
+                }
+            });
+        }
+
+        public void reschedule() {
+            updateStatusText();
+            // Reschedule so this task repeats
+            if (mEnabled) {
+                mHandler.postDelayed(this, SNIFFER_UPDATE_PERIOD_MSEC);
+            }
+        }
+
+        public abstract void updateStatusText();
+
+        public String getShortReport() {
+            return "no-report";
+        }
+
+        public double getMaxSecondsWithNoGlitch() {
+            return 0.0;
+        }
+    }
+
+    // Periodically query for glitches from the native detector.
+    protected class GlitchSniffer extends NativeSniffer {
 
         private long mTimeAtStart;
         private long mTimeOfLastGlitch;
@@ -88,10 +134,10 @@ public class GlitchActivity extends AnalyzerActivity {
 
         private double mSignalToNoiseDB;
         private double mPeakAmplitude;
-        private Handler mHandler = new Handler(Looper.getMainLooper()); // UI thread
-        private volatile boolean mEnabled = true;
 
-        private void startSniffer() {
+
+        @Override
+        public void startSniffer() {
             long now = System.currentTimeMillis();
             mTimeAtStart = now;
             mTimeOfLastGlitch = now;
@@ -102,71 +148,47 @@ public class GlitchActivity extends AnalyzerActivity {
             mMaxSecondsWithoutGlitches = 0.0;
             mLastGlitchCount = 0;
             mStartResetCount = mLastResetCount;
-            // Start the initial runnable task by posting through the handler
-            mEnabled = true;
-            mHandler.postDelayed(runnableCode, SNIFFER_UPDATE_DELAY_MSEC);
+            super.startSniffer();
         }
 
-        private void stopSniffer() {
-            mEnabled = false;
-            if (mHandler != null) {
-                mHandler.removeCallbacks(runnableCode);
+        public void run() {
+            int state = getAnalyzerState();
+            mSignalToNoiseDB = getSignalToNoiseDB();
+            mPeakAmplitude = getPeakAmplitude();
+            mPreviousState = state;
+
+            long now = System.currentTimeMillis();
+            int glitchCount = getGlitchCount();
+            int resetCount = getResetCount();
+            mLastUnlockedFrames = getStateFrameCount(STATE_WAITING_FOR_LOCK);
+            int lockedFrames = getStateFrameCount(STATE_LOCKED);
+            int glitchFrames = getStateFrameCount(STATE_GLITCHING);
+
+            if (glitchFrames > mLastGlitchFrames || glitchCount > mLastGlitchCount) {
+                mTimeOfLastGlitch = now;
+                mSecondsWithoutGlitches = 0.0;
+                onGlitchDetected();
+            } else if (lockedFrames > mLastLockedFrames) {
+                mSecondsWithoutGlitches = (now - mTimeOfLastGlitch) / 1000.0;
             }
 
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    updateStatusText();
-                }
-            });
-        }
-
-        private Runnable runnableCode = new Runnable() {
-            @Override
-            public void run() {
-                int state = getAnalyzerState();
-                mSignalToNoiseDB = getSignalToNoiseDB();
-                mPeakAmplitude = getPeakAmplitude();
-                mPreviousState = state;
-
-                long now = System.currentTimeMillis();
-                int glitchCount = getGlitchCount();
-                int resetCount = getResetCount();
-                mLastUnlockedFrames = getStateFrameCount(STATE_WAITING_FOR_LOCK);
-                int lockedFrames = getStateFrameCount(STATE_LOCKED);
-                int glitchFrames = getStateFrameCount(STATE_GLITCHING);
-
-                if (glitchFrames > mLastGlitchFrames || glitchCount > mLastGlitchCount) {
-                    mTimeOfLastGlitch = now;
-                    mSecondsWithoutGlitches = 0.0;
-                    onGlitchDetected();
-                } else if (lockedFrames > mLastLockedFrames) {
-                    mSecondsWithoutGlitches = (now - mTimeOfLastGlitch) / 1000.0;
-                }
-
-                if (resetCount > mLastResetCount) {
-                    mLastResetCount = resetCount;
-                }
-
-                if (mSecondsWithoutGlitches > mMaxSecondsWithoutGlitches) {
-                    mMaxSecondsWithoutGlitches = mSecondsWithoutGlitches;
-                }
-
-                mLastGlitchCount = glitchCount;
-                mLastGlitchFrames = glitchFrames;
-                mLastLockedFrames = lockedFrames;
+            if (resetCount > mLastResetCount) {
                 mLastResetCount = resetCount;
-
-                updateStatusText();
-
-                // Reschedule so this task repeats
-                if (mEnabled) {
-                    mHandler.postDelayed(runnableCode, SNIFFER_UPDATE_PERIOD_MSEC);
-                }
             }
-        };
 
-        String getCurrentStatusReport() {
+            if (mSecondsWithoutGlitches > mMaxSecondsWithoutGlitches) {
+                mMaxSecondsWithoutGlitches = mSecondsWithoutGlitches;
+            }
+
+            mLastGlitchCount = glitchCount;
+            mLastGlitchFrames = glitchFrames;
+            mLastLockedFrames = lockedFrames;
+            mLastResetCount = resetCount;
+
+            reschedule();
+        }
+
+        public String getCurrentStatusReport() {
             long now = System.currentTimeMillis();
             double totalSeconds = (now - mTimeAtStart) / 1000.0;
 
@@ -190,6 +212,7 @@ public class GlitchActivity extends AnalyzerActivity {
             return message.toString();
         }
 
+        @Override
         public String getShortReport() {
             String resultText = "#glitches = " + getLastGlitchCount()
                     + ", #resets = " + getLastResetCount()
@@ -199,11 +222,13 @@ public class GlitchActivity extends AnalyzerActivity {
             return resultText;
         }
 
-        private void updateStatusText() {
+        @Override
+        public void updateStatusText() {
             mLastGlitchReport = getCurrentStatusReport();
             setAnalyzerText(mLastGlitchReport);
         }
 
+        @Override
         public double getMaxSecondsWithNoGlitch() {
             return mMaxSecondsWithoutGlitches;
         }
@@ -216,13 +241,18 @@ public class GlitchActivity extends AnalyzerActivity {
         }
     }
 
+
+    NativeSniffer createNativeSniffer() {
+        return new GlitchSniffer();
+    }
+
+    private NativeSniffer mGlitchSniffer = createNativeSniffer();
+
     // Called on UI thread
     protected void onGlitchDetected() {
     }
 
-    private GlitchSniffer mGlitchSniffer = new GlitchSniffer();
-
-    private void setAnalyzerText(String s) {
+    protected void setAnalyzerText(String s) {
         mAnalyzerTextView.setText(s);
     }
 
@@ -232,6 +262,28 @@ public class GlitchActivity extends AnalyzerActivity {
      * @param tolerance normalized between 0.0 and 1.0
      */
     public native void setTolerance(float tolerance);
+
+    public void setInputChannel(int channel) {
+        mInputChannel = channel;
+        setInputChannelNative(channel);
+    }
+
+    public void setOutputChannel(int channel) {
+        mOutputChannel = channel;
+        setOutputChannelNative(channel);
+    }
+
+    public int getInputChannel() {
+        return mInputChannel;
+    }
+
+    public int getOutputChannel() {
+        return mOutputChannel;
+    }
+
+    public native void setInputChannelNative(int channel);
+
+    public native void setOutputChannelNative(int channel);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -254,9 +306,13 @@ public class GlitchActivity extends AnalyzerActivity {
     }
 
     @Override
+    int getActivityType() {
+        return ACTIVITY_GLITCHES;
+    }
+
+    @Override
     protected void onStart() {
         super.onStart();
-        setActivityType(ACTIVITY_GLITCHES);
         mStartButton.setEnabled(true);
         mStopButton.setEnabled(false);
         mShareButton.setEnabled(false);
@@ -270,6 +326,7 @@ public class GlitchActivity extends AnalyzerActivity {
 
     // Called on UI thread
     public void onStartAudioTest(View view) throws IOException {
+        openAudio();
         startAudioTest();
         mStartButton.setEnabled(false);
         mStopButton.setEnabled(true);
@@ -278,7 +335,6 @@ public class GlitchActivity extends AnalyzerActivity {
     }
 
     public void startAudioTest() throws IOException {
-        openAudio();
         startAudio();
         mGlitchSniffer.startSniffer();
         onTestBegan();
@@ -311,6 +367,10 @@ public class GlitchActivity extends AnalyzerActivity {
         mGlitchSniffer.stopSniffer();
         stopAudio();
         closeAudio();
+    }
+
+    public void stopTest() {
+        stopAudio();
     }
 
     @Override

@@ -108,9 +108,8 @@ public class TapToToneActivity extends TestOutputActivityBase {
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
-        setActivityType(ACTIVITY_TAP_TO_TONE);
+    int getActivityType() {
+        return ACTIVITY_TAP_TO_TONE;
     }
 
     @Override
@@ -333,7 +332,7 @@ public class TapToToneActivity extends TestOutputActivityBase {
     }
 
     @Override
-    public void startAudio() {
+    public void startAudio() throws IOException {
         if (hasRecordAudioPermission()) {
             startAudioPermitted();
         } else {
@@ -341,14 +340,10 @@ public class TapToToneActivity extends TestOutputActivityBase {
         }
     }
 
-    private void startAudioPermitted() {
+    private void startAudioPermitted() throws IOException {
         super.startAudio();
         resetLatency();
-        try {
-            mAudioMidiTester.start();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        mAudioMidiTester.start();
     }
 
     @Override

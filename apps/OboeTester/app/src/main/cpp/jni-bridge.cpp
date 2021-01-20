@@ -179,7 +179,7 @@ Java_com_google_sample_oboe_manualtest_OboeAudioStream_close(JNIEnv *env, jobjec
 JNIEXPORT jint JNICALL
 Java_com_google_sample_oboe_manualtest_OboeAudioStream_setBufferSizeInFrames(
         JNIEnv *env, jobject, jint streamIndex, jint threshold) {
-    oboe::AudioStream *oboeStream = engine.getCurrentActivity()->getStream(streamIndex);
+    std::shared_ptr<oboe::AudioStream> oboeStream = engine.getCurrentActivity()->getStream(streamIndex);
     if (oboeStream != nullptr) {
         auto result = oboeStream->setBufferSizeInFrames(threshold);
         return (!result)
@@ -193,7 +193,7 @@ JNIEXPORT jint JNICALL
 Java_com_google_sample_oboe_manualtest_OboeAudioStream_getBufferSizeInFrames(
         JNIEnv *env, jobject, jint streamIndex) {
     jint result = (jint) oboe::Result::ErrorNull;
-    oboe::AudioStream *oboeStream = engine.getCurrentActivity()->getStream(streamIndex);
+    std::shared_ptr<oboe::AudioStream> oboeStream = engine.getCurrentActivity()->getStream(streamIndex);
     if (oboeStream != nullptr) {
         result = oboeStream->getBufferSizeInFrames();
     }
@@ -204,7 +204,7 @@ JNIEXPORT jint JNICALL
 Java_com_google_sample_oboe_manualtest_OboeAudioStream_getBufferCapacityInFrames(
         JNIEnv *env, jobject, jint streamIndex) {
     jint result = (jint) oboe::Result::ErrorNull;
-    oboe::AudioStream *oboeStream = engine.getCurrentActivity()->getStream(streamIndex);
+    std::shared_ptr<oboe::AudioStream> oboeStream = engine.getCurrentActivity()->getStream(streamIndex);
     if (oboeStream != nullptr) {
         result = oboeStream->getBufferCapacityInFrames();
     }
@@ -228,7 +228,7 @@ JNIEXPORT jint JNICALL
 Java_com_google_sample_oboe_manualtest_OboeAudioStream_getNativeApi(
         JNIEnv *env, jobject, jint streamIndex) {
     jint result = (jint) oboe::Result::ErrorNull;
-    oboe::AudioStream *oboeStream = engine.getCurrentActivity()->getStream(streamIndex);
+    std::shared_ptr<oboe::AudioStream> oboeStream = engine.getCurrentActivity()->getStream(streamIndex);
     if (oboeStream != nullptr) {
         oboe::AudioApi audioApi = oboeStream->getAudioApi();
         result = convertAudioApiToNativeApi(audioApi);
@@ -241,7 +241,7 @@ JNIEXPORT jint JNICALL
 Java_com_google_sample_oboe_manualtest_OboeAudioStream_getSampleRate(
         JNIEnv *env, jobject, jint streamIndex) {
     jint result = (jint) oboe::Result::ErrorNull;
-    oboe::AudioStream *oboeStream = engine.getCurrentActivity()->getStream(streamIndex);
+    std::shared_ptr<oboe::AudioStream> oboeStream = engine.getCurrentActivity()->getStream(streamIndex);
     if (oboeStream != nullptr) {
         result = oboeStream->getSampleRate();
     }
@@ -252,7 +252,7 @@ JNIEXPORT jint JNICALL
 Java_com_google_sample_oboe_manualtest_OboeAudioStream_getSharingMode(
         JNIEnv *env, jobject, jint streamIndex) {
     jint result = (jint) oboe::Result::ErrorNull;
-    oboe::AudioStream *oboeStream = engine.getCurrentActivity()->getStream(streamIndex);
+    std::shared_ptr<oboe::AudioStream> oboeStream = engine.getCurrentActivity()->getStream(streamIndex);
     if (oboeStream != nullptr) {
         result = (jint) oboeStream->getSharingMode();
     }
@@ -263,7 +263,7 @@ JNIEXPORT jint JNICALL
 Java_com_google_sample_oboe_manualtest_OboeAudioStream_getPerformanceMode(
         JNIEnv *env, jobject, jint streamIndex) {
     jint result = (jint) oboe::Result::ErrorNull;
-    oboe::AudioStream *oboeStream = engine.getCurrentActivity()->getStream(streamIndex);
+    std::shared_ptr<oboe::AudioStream> oboeStream = engine.getCurrentActivity()->getStream(streamIndex);
     if (oboeStream != nullptr) {
         result = (jint) oboeStream->getPerformanceMode();
     }
@@ -274,7 +274,7 @@ JNIEXPORT jint JNICALL
 Java_com_google_sample_oboe_manualtest_OboeAudioStream_getInputPreset(
         JNIEnv *env, jobject, jint streamIndex) {
     jint result = (jint) oboe::Result::ErrorNull;
-    oboe::AudioStream *oboeStream = engine.getCurrentActivity()->getStream(streamIndex);
+    std::shared_ptr<oboe::AudioStream> oboeStream = engine.getCurrentActivity()->getStream(streamIndex);
     if (oboeStream != nullptr) {
         result = (jint) oboeStream->getInputPreset();
     }
@@ -285,7 +285,7 @@ JNIEXPORT jint JNICALL
 Java_com_google_sample_oboe_manualtest_OboeAudioStream_getFramesPerBurst(
         JNIEnv *env, jobject, jint streamIndex) {
     jint result = (jint) oboe::Result::ErrorNull;
-    oboe::AudioStream *oboeStream = engine.getCurrentActivity()->getStream(streamIndex);
+    std::shared_ptr<oboe::AudioStream> oboeStream = engine.getCurrentActivity()->getStream(streamIndex);
     if (oboeStream != nullptr) {
         result = oboeStream->getFramesPerBurst();
     }
@@ -296,7 +296,7 @@ JNIEXPORT jint JNICALL
 Java_com_google_sample_oboe_manualtest_OboeAudioStream_getChannelCount(
         JNIEnv *env, jobject, jint streamIndex) {
     jint result = (jint) oboe::Result::ErrorNull;
-    oboe::AudioStream *oboeStream = engine.getCurrentActivity()->getStream(streamIndex);
+    std::shared_ptr<oboe::AudioStream> oboeStream = engine.getCurrentActivity()->getStream(streamIndex);
     if (oboeStream != nullptr) {
         result = oboeStream->getChannelCount();
     }
@@ -306,7 +306,7 @@ Java_com_google_sample_oboe_manualtest_OboeAudioStream_getChannelCount(
 JNIEXPORT jint JNICALL
 Java_com_google_sample_oboe_manualtest_OboeAudioStream_getFormat(JNIEnv *env, jobject instance, jint streamIndex) {
         jint result = (jint) oboe::Result::ErrorNull;
-    oboe::AudioStream *oboeStream = engine.getCurrentActivity()->getStream(streamIndex);
+    std::shared_ptr<oboe::AudioStream> oboeStream = engine.getCurrentActivity()->getStream(streamIndex);
     if (oboeStream != nullptr) {
         result = (jint) oboeStream->getFormat();
     }
@@ -317,7 +317,7 @@ JNIEXPORT jint JNICALL
 Java_com_google_sample_oboe_manualtest_OboeAudioStream_getDeviceId(
         JNIEnv *env, jobject, jint streamIndex) {
     jint result = (jint) oboe::Result::ErrorNull;
-    oboe::AudioStream *oboeStream = engine.getCurrentActivity()->getStream(streamIndex);
+    std::shared_ptr<oboe::AudioStream> oboeStream = engine.getCurrentActivity()->getStream(streamIndex);
     if (oboeStream != nullptr) {
         result = oboeStream->getDeviceId();
     }
@@ -328,7 +328,7 @@ JNIEXPORT jint JNICALL
 Java_com_google_sample_oboe_manualtest_OboeAudioStream_getSessionId(
         JNIEnv *env, jobject, jint streamIndex) {
     jint result = (jint) oboe::Result::ErrorNull;
-    oboe::AudioStream *oboeStream = engine.getCurrentActivity()->getStream(streamIndex);
+    std::shared_ptr<oboe::AudioStream> oboeStream = engine.getCurrentActivity()->getStream(streamIndex);
     if (oboeStream != nullptr) {
         result = oboeStream->getSessionId();
     }
@@ -339,7 +339,7 @@ JNIEXPORT jlong JNICALL
 Java_com_google_sample_oboe_manualtest_OboeAudioStream_getFramesWritten(
         JNIEnv *env, jobject, jint streamIndex) {
     jlong result = (jint) oboe::Result::ErrorNull;
-    oboe::AudioStream *oboeStream = engine.getCurrentActivity()->getStream(streamIndex);
+    std::shared_ptr<oboe::AudioStream> oboeStream = engine.getCurrentActivity()->getStream(streamIndex);
     if (oboeStream != nullptr) {
         result = oboeStream->getFramesWritten();
     }
@@ -350,7 +350,7 @@ JNIEXPORT jlong JNICALL
 Java_com_google_sample_oboe_manualtest_OboeAudioStream_getFramesRead(
         JNIEnv *env, jobject, jint streamIndex) {
     jlong result = (jlong) oboe::Result::ErrorNull;
-    oboe::AudioStream *oboeStream = engine.getCurrentActivity()->getStream(streamIndex);
+    std::shared_ptr<oboe::AudioStream> oboeStream = engine.getCurrentActivity()->getStream(streamIndex);
     if (oboeStream != nullptr) {
         result = oboeStream->getFramesRead();
     }
@@ -361,7 +361,7 @@ JNIEXPORT jint JNICALL
 Java_com_google_sample_oboe_manualtest_OboeAudioStream_getXRunCount(
         JNIEnv *env, jobject, jint streamIndex) {
     jint result = (jlong) oboe::Result::ErrorNull;
-    oboe::AudioStream *oboeStream = engine.getCurrentActivity()->getStream(streamIndex);
+    std::shared_ptr<oboe::AudioStream> oboeStream = engine.getCurrentActivity()->getStream(streamIndex);
     if (oboeStream != nullptr) {
         auto oboeResult  = oboeStream->getXRunCount();
         if (!oboeResult) {
@@ -381,14 +381,18 @@ Java_com_google_sample_oboe_manualtest_OboeAudioStream_getCallbackCount(
 
 JNIEXPORT jint JNICALL
 Java_com_google_sample_oboe_manualtest_OboeAudioStream_getLastErrorCallbackResult(
-        JNIEnv *env, jobject) {
-    return (jint) engine.getCurrentActivity()->getLastErrorCallbackResult();
+        JNIEnv *env, jobject, jint streamIndex) {
+    std::shared_ptr<oboe::AudioStream> oboeStream = engine.getCurrentActivity()->getStream(streamIndex);
+    if (oboeStream != nullptr) {
+        return (jint) oboeStream->getLastErrorCallbackResult();
+    }
+    return 0;
 }
 
 JNIEXPORT jdouble JNICALL
 Java_com_google_sample_oboe_manualtest_OboeAudioStream_getLatency(JNIEnv *env,
         jobject instance, jint streamIndex) {
-    oboe::AudioStream *oboeStream = engine.getCurrentActivity()->getStream(streamIndex);
+    std::shared_ptr<oboe::AudioStream> oboeStream = engine.getCurrentActivity()->getStream(streamIndex);
     if (oboeStream != nullptr) {
         auto result = oboeStream->calculateLatencyMillis();
         return (!result) ? -1.0 : result.value();
@@ -409,7 +413,7 @@ Java_com_google_sample_oboe_manualtest_OboeAudioStream_setWorkload(
 
 JNIEXPORT jint JNICALL
 Java_com_google_sample_oboe_manualtest_OboeAudioStream_getState(JNIEnv *env, jobject instance, jint streamIndex) {
-    oboe::AudioStream *oboeStream = engine.getCurrentActivity()->getStream(streamIndex);
+    std::shared_ptr<oboe::AudioStream> oboeStream = engine.getCurrentActivity()->getStream(streamIndex);
     if (oboeStream != nullptr) {
         auto state = oboeStream->getState();
         if (state != oboe::StreamState::Starting && state != oboe::StreamState::Started) {
@@ -599,10 +603,29 @@ Java_com_google_sample_oboe_manualtest_GlitchActivity_getSignalToNoiseDB(JNIEnv 
                                                                          jobject instance) {
     return engine.mActivityGlitches.getGlitchAnalyzer()->getSignalToNoiseDB();
 }
+
 JNIEXPORT jdouble JNICALL
 Java_com_google_sample_oboe_manualtest_GlitchActivity_getPeakAmplitude(JNIEnv *env,
                                                                        jobject instance) {
     return engine.mActivityGlitches.getGlitchAnalyzer()->getPeakAmplitude();
+}
+
+JNIEXPORT jdouble JNICALL
+Java_com_google_sample_oboe_manualtest_TestDataPathsActivity_getMagnitude(JNIEnv *env,
+                                                                          jobject instance) {
+    return engine.mActivityDataPath.getDataPathAnalyzer()->getMagnitude();
+}
+
+JNIEXPORT jdouble JNICALL
+Java_com_google_sample_oboe_manualtest_TestDataPathsActivity_getMaxMagnitude(JNIEnv *env,
+                                                                          jobject instance) {
+    return engine.mActivityDataPath.getDataPathAnalyzer()->getMaxMagnitude();
+}
+
+JNIEXPORT jdouble JNICALL
+Java_com_google_sample_oboe_manualtest_TestDataPathsActivity_getPhase(JNIEnv *env,
+                                                                          jobject instance) {
+    return engine.mActivityDataPath.getDataPathAnalyzer()->getPhaseOffset();
 }
 
 JNIEXPORT void JNICALL
@@ -611,6 +634,30 @@ Java_com_google_sample_oboe_manualtest_GlitchActivity_setTolerance(JNIEnv *env,
                                                                    jfloat tolerance) {
     if (engine.mActivityGlitches.getGlitchAnalyzer()) {
         engine.mActivityGlitches.getGlitchAnalyzer()->setTolerance(tolerance);
+    }
+}
+
+JNIEXPORT void JNICALL
+Java_com_google_sample_oboe_manualtest_GlitchActivity_setInputChannelNative(JNIEnv *env,
+                                                                   jobject instance,
+                                                                   jint channel) {
+    if (engine.mActivityGlitches.getGlitchAnalyzer()) {
+        engine.mActivityGlitches.getGlitchAnalyzer()->setInputChannel(channel);
+    }
+    if (engine.mActivityDataPath.getDataPathAnalyzer()) {
+        engine.mActivityDataPath.getDataPathAnalyzer()->setInputChannel(channel);
+    }
+}
+
+JNIEXPORT void JNICALL
+Java_com_google_sample_oboe_manualtest_GlitchActivity_setOutputChannelNative(JNIEnv *env,
+                                                                       jobject instance,
+                                                                       jint channel) {
+    if (engine.mActivityGlitches.getGlitchAnalyzer()) {
+        engine.mActivityGlitches.getGlitchAnalyzer()->setOutputChannel(channel);
+    }
+    if (engine.mActivityDataPath.getDataPathAnalyzer()) {
+        engine.mActivityDataPath.getDataPathAnalyzer()->setOutputChannel(channel);
     }
 }
 

@@ -35,7 +35,8 @@
  *
  */
 HelloOboeEngine::HelloOboeEngine()
-        : mLatencyCallback(std::make_unique<LatencyTuningCallback>(*this)) {
+        : mLatencyCallback(std::make_unique<LatencyTuningCallback>()),
+        mErrorCallback(std::make_unique<DefaultErrorCallback>(*this)) {
 }
 
 double HelloOboeEngine::getCurrentOutputLatencyMillis() {
@@ -74,7 +75,6 @@ void HelloOboeEngine::setBufferSizeInBursts(int32_t numBursts) {
     std::lock_guard<std::mutex> lock(mLock);
     if (!mStream) return;
 
-    mIsLatencyDetectionSupported = false;
     mLatencyCallback->setBufferTuneEnabled(numBursts == kBufferSizeAutomatic);
     auto result = mStream->setBufferSizeInFrames(
             numBursts * mStream->getFramesPerBurst());
@@ -86,19 +86,16 @@ void HelloOboeEngine::setBufferSizeInBursts(int32_t numBursts) {
 }
 
 void HelloOboeEngine::setAudioApi(oboe::AudioApi audioApi) {
-    mIsLatencyDetectionSupported = false;
     mAudioApi = audioApi;
     reopenStream();
 }
 
 void HelloOboeEngine::setChannelCount(int channelCount) {
-    mIsLatencyDetectionSupported = false;
     mChannelCount = channelCount;
     reopenStream();
 }
 
 void HelloOboeEngine::setDeviceId(int32_t deviceId) {
-    mIsLatencyDetectionSupported = false;
     mDeviceId = deviceId;
     if (reopenStream() != oboe::Result::OK) {
         LOGW("Open stream failed, forcing deviceId to Unspecified");
@@ -119,7 +116,8 @@ oboe::Result HelloOboeEngine::createPlaybackStream() {
     return builder.setSharingMode(oboe::SharingMode::Exclusive)
         ->setPerformanceMode(oboe::PerformanceMode::LowLatency)
         ->setFormat(oboe::AudioFormat::Float)
-        ->setCallback(mLatencyCallback.get())
+        ->setDataCallback(mLatencyCallback.get())
+        ->setErrorCallback(mErrorCallback.get())
         ->setAudioApi(mAudioApi)
         ->setChannelCount(mChannelCount)
         ->setDeviceId(mDeviceId)
@@ -128,6 +126,7 @@ oboe::Result HelloOboeEngine::createPlaybackStream() {
 
 void HelloOboeEngine::restart() {
     // The stream will have already been closed by the error callback.
+    mLatencyCallback->reset();
     start();
 }
 
@@ -149,6 +148,7 @@ oboe::Result HelloOboeEngine::start() {
                 mStream->getDeviceId());
     } else {
         LOGE("Error creating playback stream. Error: %s", oboe::convertToText(result));
+        mIsLatencyDetectionSupported = false;
     }
     return result;
 }

@@ -53,7 +53,7 @@ public class MainActivity extends Activity {
 
 
     private Spinner mModeSpinner;
-    private TextView mCallbackSizeTextView;
+    private TextView mCallbackSizeEditor;
     protected TextView mDeviceView;
     private TextView mVersionTextView;
     private TextView mBuildTextView;
@@ -61,6 +61,7 @@ public class MainActivity extends Activity {
     private Bundle mBundleFromIntent;
     private BroadcastReceiver mScoStateReceiver;
     private CheckBox mWorkaroundsCheckBox;
+    private static String mVersionText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,7 +71,7 @@ public class MainActivity extends Activity {
         logScreenSize();
 
         mVersionTextView = (TextView) findViewById(R.id.versionText);
-        mCallbackSizeTextView = (TextView) findViewById(R.id.callbackSize);
+        mCallbackSizeEditor = (TextView) findViewById(R.id.callbackSize);
 
         mDeviceView = (TextView) findViewById(R.id.deviceView);
         updateNativeAudioUI();
@@ -96,8 +97,9 @@ public class MainActivity extends Activity {
             int oboeMajor = (oboeVersion >> 24) & 0xFF;
             int oboeMinor = (oboeVersion >> 16) & 0xFF;
             int oboePatch = oboeVersion & 0xFF;
-            mVersionTextView.setText("Test v (" + pinfo.versionCode + ") " + pinfo.versionName
-                    + ", Oboe v " + oboeMajor + "." + oboeMinor + "." + oboePatch);
+            mVersionText = "OboeTester (" + pinfo.versionCode + ") v " + pinfo.versionName
+                    + ", Oboe v " + oboeMajor + "." + oboeMinor + "." + oboePatch;
+            mVersionTextView.setText(mVersionText);
         } catch (PackageManager.NameNotFoundException e) {
             mVersionTextView.setText(e.getMessage());
         }
@@ -125,6 +127,10 @@ public class MainActivity extends Activity {
         };
 
         saveIntentBundleForLaterProcessing(getIntent());
+    }
+
+    public static String getVersiontext() {
+        return mVersionText;
     }
 
     private void registerScoStateReceiver() {
@@ -198,62 +204,50 @@ public class MainActivity extends Activity {
     }
 
     public void onLaunchTestOutput(View view) {
-        updateCallbackSize();
-        Intent intent = new Intent(this, TestOutputActivity.class);
-        startActivity(intent);
+        onLaunchTest(TestOutputActivity.class);
     }
 
     public void onLaunchTestInput(View view) {
-        updateCallbackSize();
-        Intent intent = new Intent(this, TestInputActivity.class);
-        startActivity(intent);
+        onLaunchTest(TestInputActivity.class);
     }
 
     public void onLaunchTapToTone(View view) {
-        updateCallbackSize();
-        Intent intent = new Intent(this, TapToToneActivity.class);
-        startActivity(intent);
+        onLaunchTest(TapToToneActivity.class);
     }
 
     public void onLaunchRecorder(View view) {
-        updateCallbackSize();
-        Intent intent = new Intent(this, RecorderActivity.class);
-        startActivity(intent);
+        onLaunchTest(RecorderActivity.class);
     }
 
     public void onLaunchEcho(View view) {
-        updateCallbackSize();
-        Intent intent = new Intent(this, EchoActivity.class);
-        startActivity(intent);
+        onLaunchTest(EchoActivity.class);
     }
 
     public void onLaunchRoundTripLatency(View view) {
-        updateCallbackSize();
-        Intent intent = new Intent(this, RoundTripLatencyActivity.class);
-        startActivity(intent);
+        onLaunchTest(RoundTripLatencyActivity.class);
     }
 
     public void onLaunchManualGlitchTest(View view) {
-        updateCallbackSize();
-        Intent intent = new Intent(this, ManualGlitchActivity.class);
-        startActivity(intent);
+        onLaunchTest(ManualGlitchActivity.class);
     }
 
-    public void onLaunchAutoGlitchTest(View view) {
-        updateCallbackSize();
-        Intent intent = new Intent(this, AutoGlitchActivity.class);
-        startActivity(intent);
-    }
+    public void onLaunchAutoGlitchTest(View view) { onLaunchTest(AutomatedGlitchActivity.class); }
 
     public void onLaunchTestDisconnect(View view) {
-        updateCallbackSize();
-        Intent intent = new Intent(this, TestDisconnectActivity.class);
-        startActivity(intent);
+        onLaunchTest(TestDisconnectActivity.class);
     }
 
-    public void onLaunchTestDeviceReport(View view) {
+    public void onLaunchTestDataPaths(View view) {
+        onLaunchTest(TestDataPathsActivity.class);
+    }
+
+    public void onLaunchTestDeviceReport(View view)  {
+        onLaunchTest(DeviceReportActivity.class);
+    }
+
+    private void onLaunchTest(Class clazz) {
         updateCallbackSize();
-        Intent intent = new Intent(this, DeviceReportActivity.class);
+        Intent intent = new Intent(this, clazz);
         startActivity(intent);
     }
 
@@ -278,14 +272,14 @@ public class MainActivity extends Activity {
     }
 
     private void updateCallbackSize() {
-        CharSequence chars = mCallbackSizeTextView.getText();
+        CharSequence chars = mCallbackSizeEditor.getText();
         String text = chars.toString();
         int callbackSize = 0;
         try {
             callbackSize = Integer.parseInt(text);
         } catch (NumberFormatException e) {
             showErrorToast("Badly formated callback size: " + text);
-            mCallbackSizeTextView.setText("0");
+            mCallbackSizeEditor.setText("0");
         }
         OboeAudioStream.setCallbackSize(callbackSize);
     }

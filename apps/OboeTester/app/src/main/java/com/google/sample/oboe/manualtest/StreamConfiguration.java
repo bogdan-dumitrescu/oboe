@@ -146,24 +146,25 @@ public class StreamConfiguration {
         this.mPerformanceMode = performanceMode;
     }
 
-    public int getInputPreset() {
-        return mInputPreset;
-    }
-    public void setInputPreset(int inputPreset) {
-        this.mInputPreset = inputPreset;
-    }
-
     static String convertPerformanceModeToText(int performanceMode) {
         switch(performanceMode) {
             case PERFORMANCE_MODE_NONE:
-                return "NONE";
+                return "NO";
             case PERFORMANCE_MODE_POWER_SAVING:
-                return "PWRSAV";
+                return "PS";
             case PERFORMANCE_MODE_LOW_LATENCY:
-                return "LOWLAT";
+                return "LL";
             default:
-                return "INVALID";
+                return "??";
         }
+    }
+
+    public int getInputPreset() {
+        return mInputPreset;
+    }
+
+    public void setInputPreset(int inputPreset) {
+        this.mInputPreset = inputPreset;
     }
 
     public int getSharingMode() {
@@ -177,11 +178,11 @@ public class StreamConfiguration {
     static String convertSharingModeToText(int sharingMode) {
         switch(sharingMode) {
             case SHARING_MODE_SHARED:
-                return "SHARED";
+                return "SH";
             case SHARING_MODE_EXCLUSIVE:
-                return "EXCLUSIVE";
+                return "EX";
             default:
-                return "INVALID";
+                return "??";
         }
     }
 
@@ -322,9 +323,8 @@ public class StreamConfiguration {
     public boolean isMMap() {
         return mMMap;
     }
-    public void setMMap(boolean b) {
-        mMMap = b;
-    }
+
+    public void setMMap(boolean b) { mMMap = b; }
 
     public int getNativeApi() {
         return mNativeApi;
