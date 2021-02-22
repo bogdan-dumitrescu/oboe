@@ -56,11 +56,12 @@ public:
      * The indexes associated with each source channel is the order in which they
      * are added.
      */
-    void addSampleSource(SampleSource* source, SampleBuffer* buffer);
+    virtual void addSampleSource(SampleSource* source, SampleBuffer* buffer);
+
     /**
      * Deallocates and deletes all added source/buffer (see addSampleSource()).
      */
-    void unloadSampleData();
+   virtual void unloadSampleData();
 
     void triggerDown(int32_t index);
     void triggerUp(int32_t index);
