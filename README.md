@@ -1,4 +1,4 @@
-# Oboe [![Build Status](https://travis-ci.org/google/oboe.svg?branch=master)](https://travis-ci.org/google/oboe)
+# Oboe [![Build CI](https://github.com/google/oboe/workflows/Build%20CI/badge.svg)](https://github.com/google/oboe/actions)
 
 [![Introduction to Oboe video](docs/images/getting-started-video.jpg)](https://www.youtube.com/watch?v=csfHAbr5ilI&list=PLWz5rJ2EKKc_duWv9IPNvx9YBudNMmLSa)
 
@@ -12,9 +12,6 @@ Oboe is a C++ library which makes it easy to build high-performance audio apps o
 - Workarounds for some known issues
 - [Used by popular apps and frameworks](docs/AppsUsingOboe.md)
 
-## Requirements
-To build Oboe you'll need a compiler which supports C++14 and the Android header files. The easiest way to obtain these is by downloading the Android NDK r17 or above. It can be installed using Android Studio's SDK manager, or via [direct download](https://developer.android.com/ndk/downloads/).
-
 ## Documentation
 - [Getting Started Guide](docs/GettingStarted.md)
 - [Full Guide to Oboe](docs/FullGuide.md)
@@ -24,6 +21,10 @@ To build Oboe you'll need a compiler which supports C++14 and the Android header
 - [Migration guide for apps using OpenSL ES](docs/OpenSLESMigration.md)
 - [Frequently Asked Questions](docs/FAQ.md) (FAQ)
 - [Our roadmap](https://github.com/google/oboe/milestones) - Vote on a feature/issue by adding a thumbs up to the first comment.
+
+### Community
+- Reddit: [r/androidaudiodev](https://www.reddit.com/r/androidaudiodev/)
+- StackOverflow: [#oboe](https://stackoverflow.com/questions/tagged/oboe)
 
 ## Testing
 - [**OboeTester** app for measuring latency, glitches, etc.](https://github.com/google/oboe/tree/master/apps/OboeTester/docs)

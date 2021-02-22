@@ -98,22 +98,31 @@ class MainActivity : AppCompatActivity() {
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
             handleMidiDevices()
         }
+
     }
+
+    override fun onDestroy() {
+        // Clear the FX UI
+        EffectsAdapter.effectList.clear()
+        EffectsAdapter.notifyDataSetChanged()
+        super.onDestroy()
+    }
+
+    override fun onPause() {
+        // Shutdown Engine
+        NativeInterface.destroyAudioEngine()
+        super.onPause()
+    }
+
     override fun onResume() {
         super.onResume()
+        // Startup Engine
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
             == PackageManager.PERMISSION_GRANTED
         ) {
             NativeInterface.createAudioEngine()
             NativeInterface.enable(isAudioEnabled)
         }
-    }
-
-    override fun onPause() {
-        NativeInterface.destroyAudioEngine()
-        EffectsAdapter.effectList.clear()
-        EffectsAdapter.notifyDataSetChanged()
-        super.onPause()
     }
 
     override fun onRequestPermissionsResult(
